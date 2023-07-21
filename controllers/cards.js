@@ -2,7 +2,7 @@ const Card = require('../models/card');
 
 module.exports.getCards = (_req, res) => {
   Card.find({})
-    .then((cards) => res.status(200).send({ data: cards }))
+    .then((cards) => res.status(200).send(cards))
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };
 
@@ -20,7 +20,7 @@ module.exports.deleteCard = (req, res) => {
       if (!card) {
         res.status(404).send({ message: 'Нет карточки с таким id' });
       }
-      return Card.findByIdAndRemove(req.params.cardId);
+      Card.findByIdAndRemove(req.params.cardId);
     })
     .then((card) => {
       res.status(200).send(card);
