@@ -21,7 +21,7 @@ module.exports.getUser = (req, res) => {
       res.status(SUCCESS).send(user);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.kind === 'ObjectId') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
       }
       res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
