@@ -20,7 +20,12 @@ module.exports.getUser = (req, res) => {
       }
       res.status(SUCCESS).send(user);
     })
-    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
+      }
+      res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
+    });
 };
 
 module.exports.createUser = (req, res) => {
