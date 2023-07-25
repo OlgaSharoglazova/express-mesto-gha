@@ -44,8 +44,13 @@ module.exports.createUser = (req, res) => {
 module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, { name, about })
-    .then((newData) => res.status(SUCCESS).send(newData))
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
+    .then((user) => {
+      if (!user) {
+        res.status(NOT_FOUND).send({ message: 'Нет пользователя с таким id' });
+      }
+      res.status(SUCCESS).send(user);
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
@@ -57,7 +62,7 @@ module.exports.updateUser = (req, res) => {
 module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, { avatar })
+  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
     .then((newAvatar) => res.status(SUCCESS).send(newAvatar))
     .catch((err) => {
       if (err.name === 'ValidationError') {
