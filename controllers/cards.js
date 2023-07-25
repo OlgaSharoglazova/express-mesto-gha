@@ -50,7 +50,7 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
     } res.status(SUCCESS).send(card);
   })
   .catch((err) => {
-    if (err.name === 'ValidationError') {
+    if (err.name === 'CastError') {
       res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
     }
     res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
@@ -61,7 +61,11 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
   { $pull: { likes: req.user._id } }, // убрать _id из массива
   { new: true },
 )
-  .then((card) => res.status(SUCCESS).send(card))
+  .then((card) => {
+    if (!card) {
+      res.status(NOT_FOUND).send({ message: 'Нет карточки с таким id' });
+    } res.status(SUCCESS).send(card);
+  })
   .catch((err) => {
     if (err.name === 'ValidationError') {
       res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
