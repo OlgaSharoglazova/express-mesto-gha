@@ -52,10 +52,11 @@ module.exports.updateUser = (req, res) => {
       res.status(SUCCESS).send(user);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
+      } else {
+        res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
       }
-      res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -67,7 +68,8 @@ module.exports.updateAvatar = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
+      } else {
+        res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
       }
-      res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
     });
 };
