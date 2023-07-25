@@ -31,12 +31,17 @@ module.exports.deleteCard = (req, res) => {
       if (!card) {
         res.status(NOT_FOUND).send({ message: 'Нет карточки с таким id' });
       }
-      Card.findByIdAndRemove(req.params.cardId);
+      return Card.findByIdAndRemove(req.params.cardId);
     })
     .then(() => {
       res.status(SUCCESS).send({ message: 'Карточка удалена' });
     })
-    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
+      }
+      res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
+    });
 };
 
 module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
