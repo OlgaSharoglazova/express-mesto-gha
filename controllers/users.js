@@ -5,6 +5,7 @@ const {
   NOT_FOUND,
   DEFAULT_ERROR,
 } = require('../utils/constants');
+const { generateToken } = require('../utils/token');
 
 module.exports.getUsers = (_req, res) => {
   User.find({})
@@ -51,6 +52,32 @@ module.exports.createUser = (req, res) => {
       }
       return res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
     });
+};
+
+module.exports.login = async (req, res) => {
+  if (!req.body) {
+    res.status(BAD_REQUEST).json({ message: 'Переданы некорректные данные' });
+    return;
+  }
+  const { email, password } = req.body;
+  if (!email || !password) {
+    res.status(BAD_REQUEST).json({ message: 'Переданы некорректные данные' });
+    return;
+  }
+  const user = await User.findOne({ email });
+  if (!user) {
+    res.status(401).json({ message: 'Неверная почта или пароль' });
+    return;
+  }
+  const result = await bcrypt.compare(password, user.password);
+  if (!result) {
+    res.status(401).json({ message: 'Неверная почта или пароль' });
+    return;
+  }
+  const payload = { _id: user._id, email: user.email };
+  const token = generateToken(payload);
+  res.cookie('jwt', token);
+  res.status(200).json(payload);
 };
 
 module.exports.updateUser = (req, res) => {
