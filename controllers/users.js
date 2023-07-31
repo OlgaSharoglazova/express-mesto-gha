@@ -5,7 +5,7 @@ const {
   NOT_FOUND,
   DEFAULT_ERROR,
 } = require('../utils/constants');
-const { generateToken } = require('../utils/token');
+const { generateToken } = require('../middlewares/auth');
 
 module.exports.getUsers = (_req, res) => {
   User.find({})
