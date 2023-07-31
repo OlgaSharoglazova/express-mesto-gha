@@ -13,6 +13,22 @@ module.exports.getUsers = (_req, res) => {
     .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
 };
 
+module.exports.getUserMe = (req, res) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        return res.status(NOT_FOUND).send({ message: 'Нет пользователя с таким id' });
+      }
+      return res.send(user);
+    })
+    .catch((err) => {
+      if (err.kind === 'ObjectId') {
+        return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
+      }
+      return res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
+    });
+};
+
 module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => {

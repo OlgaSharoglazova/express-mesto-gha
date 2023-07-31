@@ -4,9 +4,12 @@ const {
   updateUser,
   updateAvatar,
   getUser,
+  getUserMe,
 } = require('../controllers/users');
 
 userRoutes.get('/', getUsers);
+
+userRoutes.get('/me', getUserMe);
 
 userRoutes.patch('/me', updateUser);
 
