@@ -1,16 +1,16 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const {
   BAD_REQUEST,
   NOT_FOUND,
   DEFAULT_ERROR,
 } = require('../utils/constants');
-const { generateToken } = require('../middlewares/auth');
 
 module.exports.getUsers = (_req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
+    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' }));
 };
 
 module.exports.getUserMe = (req, res) => {
@@ -70,30 +70,19 @@ module.exports.createUser = (req, res) => {
     });
 };
 
-module.exports.login = async (req, res) => {
-  if (!req.body) {
-    res.status(BAD_REQUEST).json({ message: 'Переданы некорректные данные' });
-    return;
-  }
+module.exports.login = (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) {
-    res.status(BAD_REQUEST).json({ message: 'Переданы некорректные данные' });
-    return;
-  }
-  const user = await User.findOne({ email });
-  if (!user) {
-    res.status(401).json({ message: 'Неверная почта или пароль' });
-    return;
-  }
-  const result = await bcrypt.compare(password, user.password);
-  if (!result) {
-    res.status(401).json({ message: 'Неверная почта или пароль' });
-    return;
-  }
-  const payload = { _id: user._id, email: user.email };
-  const token = generateToken(payload);
-  res.cookie('jwt', token);
-  res.status(200).json(payload);
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      res.send({ token });
+    })
+    .catch((err) => {
+      res
+        .status(401)
+        .send({ message: err.message });
+    });
 };
 
 module.exports.updateUser = (req, res) => {

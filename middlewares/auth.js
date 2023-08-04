@@ -1,20 +1,26 @@
-const JWT = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 
-const SECRET_KEY = 'secret';
+module.exports = (req, res, next) => {
+  const { authorization } = req.headers;
 
-function generateToken(payload) {
-  return JWT.sign(payload, SECRET_KEY, { expiresIn: '7d' });
-}
-
-function checkToken(token) {
-  if (!token) {
-    return false;
+  if (!authorization || !authorization.startsWith('Bearer ')) {
+    return res
+      .status(401)
+      .send({ message: 'Необходима авторизация' });
   }
+
+  const token = authorization.replace('Bearer ', '');
+  let payload;
+
   try {
-    return JWT.verify(token, SECRET_KEY);
+    payload = jwt.verify(token, 'some-secret-key');
   } catch (err) {
-    return false;
+    return res
+      .status(401)
+      .send({ message: 'Необходима авторизация' });
   }
-}
 
-module.exports = { generateToken, checkToken };
+  req.user = payload; // записываем пейлоуд в объект запроса
+
+  return next(); // пропускаем запрос дальше
+};
