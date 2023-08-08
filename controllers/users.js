@@ -1,14 +1,10 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  DEFAULT_ERROR,
-} = require('../utils/constants');
-// const ConflictError = require('../errors/conflictError');
+
+const ConflictError = require('../errors/conflictError');
 const NotFound = require('../errors/notFound');
-// const Unauthorized = require('../errors/unauthorized');
+const Unauthorized = require('../errors/unauthorized');
 const BadRequest = require('../errors/badRequest');
 
 module.exports.getUsers = (_req, res, next) => {
@@ -34,23 +30,24 @@ module.exports.getUserMe = (req, res, next) => {
     });
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND).send({ message: 'Нет пользователя с таким id' });
+        next(new NotFound('Нет пользователя с таким id'));
       }
       return res.send(user);
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
-        return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
+        next(new BadRequest('Переданы некорректные данные'));
+        return;
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
+      next(err);
     });
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name,
     about,
@@ -74,13 +71,16 @@ module.exports.createUser = (req, res) => {
     }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
+        next(new BadRequest('Переданы некорректные данные'));
+      } else if (err.code === 11000) {
+        next(new ConflictError('Данный email уже зарегистрирован'));
+      } else {
+        next(err);
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -88,41 +88,40 @@ module.exports.login = (req, res) => {
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
       res.send({ token });
     })
-    .catch((err) => {
-      res
-        .status(401)
-        .send({ message: err.message });
+    .catch(() => {
+      next(new Unauthorized('Ошибка авторизации'));
     });
 };
 
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND).send({ message: 'Нет пользователя с таким id' });
+        next(new NotFound('Нет пользователя с таким id'));
       }
       return res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
+        next(new BadRequest('Переданы некорректные данные'));
+        return;
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
+      next(err);
     });
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((newAvatar) => res.send(newAvatar))
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
+        next(new BadRequest('Переданы некорректные данные'));
       } else {
-        res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
+        next(err);
       }
     });
 };
