@@ -6,26 +6,31 @@ const {
   NOT_FOUND,
   DEFAULT_ERROR,
 } = require('../utils/constants');
+// const ConflictError = require('../errors/conflictError');
+const NotFound = require('../errors/notFound');
+// const Unauthorized = require('../errors/unauthorized');
+const BadRequest = require('../errors/badRequest');
 
-module.exports.getUsers = (_req, res) => {
+module.exports.getUsers = (_req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' }));
+    .catch(next);
 };
 
-module.exports.getUserMe = (req, res) => {
+module.exports.getUserMe = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND).send({ message: 'Нет пользователя с таким id' });
+        next(new NotFound('Нет пользователя с таким id'));
       }
       return res.send(user);
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
-        return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
+        next(new BadRequest('Переданы некорректные данные'));
+        return;
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
+      next(err);
     });
 };
 
