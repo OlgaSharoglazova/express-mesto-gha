@@ -32,7 +32,7 @@ module.exports.deleteCard = (req, res, next) => {
       } if (!card) {
         throw new NotFound('Нет карточки с таким id');
       }
-      Card.deleteOne(card)
+      return Card.deleteOne(card)
         .then(() => {
           res.send({ message: 'Карточка удалена' });
         });
