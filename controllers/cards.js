@@ -53,8 +53,8 @@ module.exports.likeCard = (req, res, next) => Card.findByIdAndUpdate(
 )
   .then((card) => {
     if (!card) {
-      next(new NotFound('Нет карточки с таким id'));
-    } return res.send(card);
+      throw new NotFound('Нет карточки с таким id');
+    } res.send(card);
   })
   .catch((err) => {
     if (err.name === 'CastError') {
@@ -71,8 +71,8 @@ module.exports.dislikeCard = (req, res, next) => Card.findByIdAndUpdate(
 )
   .then((card) => {
     if (!card) {
-      next(new NotFound('Нет карточки с таким id'));
-    } return res.send(card);
+      throw new NotFound('Нет карточки с таким id');
+    } res.send(card);
   })
   .catch((err) => {
     if (err.name === 'CastError') {
