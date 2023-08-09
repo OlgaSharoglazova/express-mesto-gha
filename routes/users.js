@@ -8,7 +8,7 @@ const {
   getUserMe,
 } = require('../controllers/users');
 
-const regularExpression = require('../utils/constants');
+const regularExpression = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]*)/;
 
 userRoutes.get('/', getUsers);
 
