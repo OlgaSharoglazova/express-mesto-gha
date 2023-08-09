@@ -30,10 +30,13 @@ module.exports.deleteCard = (req, res, next) => {
     .then((card) => {
       if (card.owner !== req.user._id) {
         throw new Forbidden('Нельзя удалить чужую карточку');
-      } return Card.deleteOne(card);
+      }
     })
-    .then((card) => {
-      res.send(card);
+    .then(() => {
+      Card.deleteOne(req.params.cardId)
+        .then((card) => {
+          res.send(card);
+        });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
