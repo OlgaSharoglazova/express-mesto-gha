@@ -17,9 +17,9 @@ module.exports.getUserMe = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        next(new NotFound('Нет пользователя с таким id'));
+        throw new NotFound('Нет пользователя с таким id');
       }
-      return res.send(user);
+      res.send(user);
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
@@ -34,9 +34,9 @@ module.exports.getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        next(new NotFound('Нет пользователя с таким id'));
+        throw new NotFound('Нет пользователя с таким id');
       }
-      return res.send(user);
+      res.send(user);
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
