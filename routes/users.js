@@ -23,7 +23,7 @@ userRoutes.patch('/me', celebrate({
 
 userRoutes.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().min(4).pattern(regularExpression),
+    avatar: Joi.string().min(4).regex(regularExpression),
   }),
 }), updateAvatar);
 
