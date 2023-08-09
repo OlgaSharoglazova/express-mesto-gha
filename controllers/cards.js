@@ -32,10 +32,10 @@ module.exports.deleteCard = (req, res, next) => {
       } if (!card) {
         throw new NotFound('Нет карточки с таким id');
       }
-      return Card.findByIdAndRemove(req.params.cardId);
-    })
-    .then(() => {
-      res.send({ message: 'Карточка удалена' });
+      Card.deleteOne(card)
+        .then(() => {
+          res.send({ message: 'Карточка удалена' });
+        });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
