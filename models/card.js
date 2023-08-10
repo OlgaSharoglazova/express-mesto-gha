@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-// const validator = require('validator');
+
 const regularExpression = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]*)/;
 
 const cardSchema = new mongoose.Schema({
@@ -16,10 +16,6 @@ const cardSchema = new mongoose.Schema({
       validator: (url) => regularExpression.test(url),
       message: 'Неверный формат ссылки',
     },
-    // validate: {
-    // validator: (url) => validator.isUrl(url),
-    // message: 'Неверный формат ссылки',
-    // },
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,

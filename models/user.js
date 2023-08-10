@@ -24,10 +24,6 @@ const userSchema = new mongoose.Schema({
       validator: (url) => regularExpression.test(url),
       message: 'Неверный формат ссылки',
     },
-    // validate: {
-    // validator: (url) => validator.isUrl(url),
-    // message: 'Неверный формат ссылки',
-    // },
   },
   email: {
     type: String,
