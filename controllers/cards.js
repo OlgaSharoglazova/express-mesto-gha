@@ -34,10 +34,10 @@ module.exports.deleteCard = (req, res, next) => {
         throw new Forbidden('Нельзя удалить чужую карточку');
       }
     })
-    .then(() => {
-      Card.deleteOne(req.params.cardId)
-        .then((card) => {
-          res.send(card);
+    .then((card) => {
+      Card.deleteOne(card)
+        .then(() => {
+          res.send('Нельзя удалять карточки других пользователей');
         });
     })
     .catch((err) => {
